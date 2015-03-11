@@ -18,13 +18,18 @@ for k = 2:1:rows
 end
 end
 
-function [filter, winterSlide] = GetWinterSlide(image, filter, rows, cols)
+function [filter, winterSlide] = GetWinterSlide(image, filter, rows, fast_cols)
 winterSlide = image/255. + filter;
 winterSlide(find(winterSlide>1))=1;
 %imshow(winterSlide);
-filter = vertcat(filter(rows:rows, :, :),filter(1:rows-1, :, :));
+filter = IncrementFilter(filter, rows, fast_cols)
 end
-function [filter] = Adjust Filter(
+
+function [filter] = IncrementFilter(filter, rows, cols)
+filter = vertcat(filter(rows:rows, :, :),filter(1:rows-1, :, :));
+
+end
+
 function [filter] = InitialShowFilter(rows, cols)
 locationArray = rand(rows, cols)>.995;
 filter = getImageFilter(locationArray, rows, cols);
@@ -43,5 +48,8 @@ for row = rad + 1:1:rows-rad
         end
     end
 end
+end
+
+function [fast_cols] = chooseFastCols(cols)
 
 end

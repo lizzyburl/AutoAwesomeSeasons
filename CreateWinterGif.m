@@ -1,41 +1,45 @@
 function [  ] = CreateWinterGif( picturePath )
 % Creates a winter gif
 FileName = 'test.gif';
-scaleFactor = .25
+scaleFactor = .25;
 winterPic = double(imread(picturePath));
 winterPic = imresize(winterPic, scaleFactor);
 [rows, cols, ~] = size(winterPic);
-filter = InitialShowFilter(rows, cols);
-[filter, winterSlide] = GetWinterSlide(winterPic, filter, rows, cols);
+locationArray = InitialSnowLocs(rows, cols);
+fast_cols = ChooseFastCols(cols);
+[locationArray, winterSlide] = GetWinterSlide(winterPic, locationArray, rows, cols, fast_cols);
 [A, map] = rgb2ind(winterSlide,256);
 imwrite(A, map, FileName, 'gif', 'LoopCount', Inf, 'DelayTime', .05);
 for k = 2:1:rows
     % pause;
-    [filter, winterSlide] = GetWinterSlide(winterPic, filter, rows, cols);
+    [locationArray, winterSlide] = GetWinterSlide(winterPic, locationArray, rows, cols, fast_cols);
     [A, map] = rgb2ind(winterSlide,256);
     imwrite(A, map, FileName, 'gif', 'WriteMode', 'append', 'DelayTime', .05);
     k
 end
 end
 
-function [filter, winterSlide] = GetWinterSlide(image, filter, rows, cols)
+function [locationArray, winterSlide] = GetWinterSlide(image, locationArray, rows, cols, fast_cols)
+filter = GetImageFilter(locationArray, rows, cols);
 winterSlide = image/255. + filter;
 winterSlide(find(winterSlide>1))=1;
 %imshow(winterSlide);
-filter = IncrementFilter(filter, rows, cols)
+locationArray = IncrementFilter(locationArray, rows, fast_cols);
 end
 
-function [filter] = IncrementFilter(filter, rows, cols)
-filter = vertcat(filter(rows:rows, :, :),filter(1:rows-1, :, :));
+function [locationArray] = IncrementFilter(locationArray, rows, fast_cols)
+locationArray = vertcat(locationArray(rows:rows, :),locationArray(1:rows-1, :));
 
+for col = fast_cols
+    locationArray(:,col:col) = vertcat(locationArray(rows:rows,col:col),locationArray(1:rows-1,col:col));
+end
 end
 
-function [filter] = InitialShowFilter(rows, cols)
+function [locationArray] = InitialSnowLocs(rows, cols)
 locationArray = rand(rows, cols)>.995;
-filter = getImageFilter(locationArray, rows, cols);
 end
 
-function [filter] = getImageFilter(locationArray, rows, cols)
+function [filter] = GetImageFilter(locationArray, rows, cols)
 diam = 3;
 rad = floor(diam/2);
 G = fspecial('gaussian', [diam diam], .75)*3;
@@ -48,5 +52,8 @@ for row = rad + 1:1:rows-rad
         end
     end
 end
+end
 
+function [fast_cols] = ChooseFastCols(cols)
+    fast_cols = floor(rand(1, floor(cols/10))*(cols-1))+ 1
 end
