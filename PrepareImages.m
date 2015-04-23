@@ -4,7 +4,7 @@
 
 function[] = PrepareImages()
 
-image_dir = 'C:\Users\Lizzy\Documents\Machine Learning\FinalProject\Data';
+image_dir = 'C:\Users\Lizzy\Documents\Machine Learning\FinalProject\Scene_data';
 
 categories = dir(image_dir);
 train_idx = 1;
@@ -26,7 +26,7 @@ for classes = 1:length(categories)
             if IsLegitDir(category_scenes(scene))
                 category_dir_scene = strcat(category_dir,'\', category_scenes(scene).name);
                 images_in_dir = dir(category_dir_scene);
-                train_images_idx = randperm(length(images_in_dir)-2, 30) + 2;
+                train_images_idx = randperm(length(images_in_dir)-2, 100) + 2;
                 test_images_idx = setdiff(1:length(images_in_dir),train_images_idx);
                 train_im_in_dir = images_in_dir(train_images_idx);
                 test_im_in_dir = images_in_dir(test_images_idx);
@@ -35,7 +35,7 @@ for classes = 1:length(categories)
                         im_path = strcat(category_dir_scene, '\', train_im_in_dir(i).name);
                         im = imread(im_path);
                         if size(im, 3) == 3
-                        im = rgb2gray(im);
+                            im = rgb2gray(im);
                         end
                         im = imresize(im, [256 256]);
                         imshow(im);
@@ -49,7 +49,9 @@ for classes = 1:length(categories)
                     if IsLegitDirListing(test_im_in_dir(i))
                         im_path = strcat(category_dir_scene, '\', test_im_in_dir(i).name);
                         im = imread(im_path);
-                        im = rgb2gray(im);
+                        if size(im, 3) == 3
+                            im = rgb2gray(im);
+                        end
                         im = imresize(im, [256 256]);
                         imshow(im);
                         test_images{test_idx} = im;
@@ -63,7 +65,7 @@ for classes = 1:length(categories)
     end
 end
 
-save('image_info.mat', 'test_images', 'test_scene_labels', 'test_category_labels', 'train_images', 'train_scene_labels', 'train_category_labels','-v7.3');
+save('image_info_15_train100.mat', 'test_images', 'test_scene_labels', 'test_category_labels', 'train_images', 'train_scene_labels', 'train_category_labels','-v7.3');
 end
 
 

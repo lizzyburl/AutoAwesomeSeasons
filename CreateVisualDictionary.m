@@ -16,5 +16,5 @@ end
 
 [visual_dict] = vl_kmeans(double(features), 200);
 
-startsave('visual_dict.mat', 'visual_dict')
+save('visual_dict.mat', 'visual_dict')
 end
