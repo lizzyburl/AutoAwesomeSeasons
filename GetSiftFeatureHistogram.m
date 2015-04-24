@@ -100,5 +100,8 @@ else
     fprintf('TOO MANY LEVELS');
 end
 
+if sum(histrogram_vector(histrogram_vector==-3000))>0
+    disp('OH NO')
+end
 histogram_vector = histrogram_vector/sum(histrogram_vector);
 end

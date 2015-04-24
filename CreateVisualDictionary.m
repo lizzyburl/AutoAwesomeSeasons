@@ -7,7 +7,7 @@ function [visual_dict] = CreateVisualDictionary(train_images)
 
 features = [];
 for i = 1:length(train_images)
-    [coord, desc] = vl_dsift(single(train_images{i}), 'fast', 'step', 5, 'size', 16);
+    [coord, desc] = vl_dsift(single(train_images{i}), 'step', 5, 'size', 16);
     features = [features, desc];
 end
 
