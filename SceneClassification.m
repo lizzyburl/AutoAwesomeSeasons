@@ -80,20 +80,27 @@ end
 accuracy = mean(diag(confusion_matrix));
 fprintf(     'Accuracy (mean of diagonal of confusion matrix) is %.3f\n', accuracy)
 
-fig_handle = figure; 
-imagesc(confusion_matrix, [0 1]); 
-set(fig_handle, 'Color', [.988, .988, .988])
-axis_handle = get(fig_handle, 'CurrentAxes');
-set(axis_handle, 'XTick', 1:15)
-set(axis_handle, 'XTickLabel', ShortenCat(mapObj.keys))
-set(axis_handle, 'YTick', 1:15)
-set(axis_handle, 'YTickLabel', mapObj.keys)
+% fig_handle = figure; 
+% imagesc(confusion_matrix, [0 1]); 
+% set(fig_handle, 'Color', [.988, .988, .988])
+% axis_handle = get(fig_handle, 'CurrentAxes');
+% set(axis_handle, 'XTick', 1:15)
+% set(axis_handle, 'XTickLabel', ShortenCat(mapObj.keys))
+% set(axis_handle, 'YTick', 1:15)
+% set(axis_handle, 'YTickLabel', mapObj.keys)
+% 
+% visualization_image = frame2im(getframe(fig_handle));
+% % getframe() is unreliable. Depending on the rendering settings, it will
+% % grab foreground windows instead of the figure in question. It could also
+% % return a partial image.
+% imwrite(visualization_image, 'confusion_matrix.png')
 
-visualization_image = frame2im(getframe(fig_handle));
-% getframe() is unreliable. Depending on the rendering settings, it will
-% grab foreground windows instead of the figure in question. It could also
-% return a partial image.
-imwrite(visualization_image, 'confusion_matrix.png')
+[is_winter_pic] = p_lab==mapObj('snow');
+
+[w_est, w_idx] = sort(p_ests(is_winter_pic, mapObj('snow'):mapObj('snow')));
+w_images = test_images(is_winter_pic)
+winter_im = w_images{w_idx(end)};
+CreateWinterGif(double(winter_im));
 end
 
 function[cat_short] = ShortenCat(cell_array)
