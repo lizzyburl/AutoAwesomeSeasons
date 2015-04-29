@@ -10,7 +10,7 @@ addpath('windows');
 addpath('windows_lin');
 
 % STEPS
-load image_info_seasons.mat
+load image_info_15_train100.mat
 % 1) Get a vocabulary built of off sift descriptors
 %    a) Load images from the training set
 %    b) Get sift features with vl_dsift
@@ -27,17 +27,17 @@ end
 %    b) For each feature, assign it to a cluster in the vocabulary
 %    c) Build a histogram of how many times that was used
 %    d) Normalize the histogram
-if ~exist('train_features__seasons_rand_nodownweight.mat')
+if ~exist('train_features_scenes_rand.mat')
     train_features = GetSiftFeatureHistogram(train_images, visual_dict);
     fprintf('Done with the training features\n');
-    save('train_features__seasons_rand_nodownweight.mat', 'train_features', '-v7.3');
+    save('train_features_scenes_rand.mat', 'train_features', '-v7.3');
 
     test_features = GetSiftFeatureHistogram(test_images, visual_dict);
     fprintf('Done with the test features\n');
-    save('test_features__seasons_rand_nodownweight.mat', 'test_features', '-v7.3');
+    save('test_features_scenes_rand.mat', 'test_features', '-v7.3');
 else
-    load train_features__seasons_rand_nodownweight.mat;
-    load test_features__seasons_rand_nodownweight.mat;
+    load train_features_scenes_rand.mat;
+    load test_features_scenes_rand.mat;
 end
 % 3) Split the image in 4 and repeat step 2 again for each segment. Do this
 %    for 2-3 levels
@@ -47,8 +47,8 @@ end
 %    b) Use a linear svm to train and test (you should be making these
 %       histograms for both the training and the test set.
 
-train_features = train_features(:,1:200);
-test_features = test_features(:,1:200);
+train_features = train_features(:,1:end);
+test_features = test_features(:,1:end);
 
 
 mapObj = containers.Map('KeyType', 'char', 'ValueType', 'int32');
@@ -62,6 +62,11 @@ acc
 
 num_categories = mapObj.Count;
 categories = 1:mapObj.Count;
+
+
+models = GetOneVersesAllModels(train_features, train_labels, num_categories);
+acc = GetOneVersesAllAccuracy(test_features, test_labels, models, num_categories);
+fprintf('One verses all accuracy: %f\n', acc);
 
 % The confusion matrix references James Hays's code. (See Brown reference)
 confusion_matrix = zeros(num_categories, num_categories);
@@ -127,5 +132,29 @@ labels = double(labels);
 
 end
 
+function[models] = GetOneVersesAllModels(training_data, training_labels, num_categories)
+models = {};
+for i = 1:1:num_categories
+    models{i} = train(double(training_labels==i), sparse(training_data), 'liblinear_options' ,'B');
+end
+
+end
+
+function[accuracy] = GetOneVersesAllAccuracy(test_data, test_labels, models, num_categories)
+all_cat_est = [];
+all_cat_lab = [];
+for i = 1:1:num_categories
+    [p_lab, acc, p_est] = predict(double(test_labels==i), sparse(test_data), models{i}, 'liblinear_options' , '-b');
+    all_cat_est = [all_cat_est,p_est];
+    all_cat_lab = [all_cat_lab,p_lab];
+end
+all_cat_est_correct = all_cat_est;
+all_cat_est_correct(all_cat_lab==0)=-1000;
+[~, chosen_category] = max(all_cat_est_correct,[], 2);
+all_cat_not = all_cat_est==0;
+
+
+accuracy = sum(chosen_category==test_labels)/length(test_labels);
+end
 
 

@@ -1,8 +1,8 @@
 function [histogram_matrix] = GetSiftFeatureHistogram(images, visual_dict)
 [rows, vocab_size] =size(visual_dict);
-numlevels = 3;
+numlevels = 2;
 total_len = 0;
-for i = 0:numlevels-1
+for i = 0:numlevels
     total_len = total_len + (4^i)*vocab_size;
 end
 histogram_matrix = zeros(length(images), total_len);
@@ -22,9 +22,13 @@ function [histogram_vector] = GetSiftHistogram(image, visual_dict, vocab_size, t
     histogram_vector = zeros(1, total_len);
     start_col = 1;
     end_col = vocab_size;
-    for i = 0:1:numlevels-1
+    for i = 0:1:numlevels
         vec = GetHistogramForLayer(coord, vocab_match, vocab_size, i);
-        vec = vec / (2^(numlevels - i));
+%         if i == 0
+%             vec = vec / (2^(numlevels - i));
+%         else
+%             vec = vec / (2^(numlevels - i + 1));
+%         end
         histogram_vector(start_col:end_col) = vec;
         start_col = end_col+1;
         end_col = end_col + (4^(i+1)*200);
